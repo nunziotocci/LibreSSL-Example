@@ -1,0 +1,17 @@
+Debug
+Debug/*
+x64
+x64/Debug
+x64/Debug/*
+x86
+x86/Debug
+x86/Debug/*
+LibreSSLTesting.VS.db
+LibreSSLTesting/x64
+LibreSSLTesting/x64/Debug
+LibreSSLTesting/x64/Debug/*
+LibreSSLTesting/Debug
+LibreSSLTesting/Debug/*
+LibreSSLTesting/x86
+LibreSSLTesting/x86/Debug
+LibreSSLTesting/x86/Debug/*

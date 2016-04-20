@@ -39,6 +39,12 @@
 #define LIBTLS_NOCONTEXT_ERROR(A)    fprintf(stderr, "ECHOSERVER: LIBTLS: %s: %d (%s)\n", A, errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
 #define LIBTLS_CONTEXT_ERROR(A, B)   fprintf(stderr, "ECHOSERVER: LIBTLS: %s %s: %d (%s)\n", A, tls_error(B), errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
 
+// This macro was renamed shortly after the api change we want to account for
+#if defined TLS_READ_AGAIN
+	#define tls_read(A, B, C) ({size_t __i__; tls_read(A, B, C, &__i__); (ssize_t)__i__;})
+	#define tls_write(A, B, C) ({size_t __i__; tls_write(A, B, C, &__i__); (ssize_t)__i__;})
+#endif
+
 int main(int argc, char *argv[]) {
 	#if defined _WIN32
 	WORD w_version_requested;
@@ -195,7 +201,7 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "accepted a client\n");
 
 		// Read from the socket
-		size_t int_out_length;
+		ssize_t int_out_length;
 		if ((int_out_length = tls_read(tls_sun_io_context, str_buffer, MAX_BUFFER - 1)) < 0) {
 			LIBTLS_CONTEXT_ERROR("tls_read() failed", tls_sun_io_context);
 		}

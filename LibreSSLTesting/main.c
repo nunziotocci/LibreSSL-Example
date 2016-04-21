@@ -38,6 +38,7 @@
 #define ECHOSERVER_ERROR(A)          fprintf(stderr, "ECHOSERVER: %s: %d (%s)\n", A, errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
 #define LIBTLS_NOCONTEXT_ERROR(A)    fprintf(stderr, "ECHOSERVER: LIBTLS: %s: %d (%s)\n", A, errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
 #define LIBTLS_CONTEXT_ERROR(A, B)   fprintf(stderr, "ECHOSERVER: LIBTLS: %s %s: %d (%s)\n", A, tls_error(B), errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
+// TODO: Should stop the program
 
 // This macro was renamed shortly after the api change we want to account for
 #if defined TLS_READ_AGAIN

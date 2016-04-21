@@ -7,4 +7,9 @@ On all platforms, self-signed certificates are supplied.
 
 Unix usage:
 
-    ./LibreSSL-Example [port:1234]
+    $ ./LibreSSL-Example [port:1234]
+
+
+To test from the command-line:
+
+    $ openssl s_client -connect 127.0.0.1:1234

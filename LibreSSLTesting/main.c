@@ -18,6 +18,7 @@
 	#include <unistd.h>
 
 	#define SOCKET int
+	#define INVALID_SOCKET -1
 #endif
 
 #include <tls.h>
@@ -80,20 +81,13 @@ int main(int argc, char *argv[]) {
 		}
 
 		// If no arguments were given, set to a default port
-	}
-	else if (argc < 2) {
+	} else if (argc < 2) {
 		int_port = 1234;
 
-	}
-	else {
+	} else {
 		ECHOSERVER_ERROR("Invalid arguments");
 	}
-
-	// Create the listening socket
-	if ((sock_listening = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-		ECHOSERVER_ERROR("socket() failed");
-	}
-
+	
 	// Get the address info
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET;
@@ -106,7 +100,7 @@ int main(int argc, char *argv[]) {
 
 	// Create the socket
 	sock_listening = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-	if (sock_listening == -1) {
+	if (sock_listening == INVALID_SOCKET) {
 		ECHOSERVER_ERROR("socket() failed");
 	}
 

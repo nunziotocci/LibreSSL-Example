@@ -35,10 +35,15 @@
 #define MAX_BUFFER            (1000)
 
 // Basic Error Handling
-#define ECHOSERVER_ERROR(A)          fprintf(stderr, "ECHOSERVER: %s: %d (%s)\n", A, errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
-#define LIBTLS_NOCONTEXT_ERROR(A)    fprintf(stderr, "ECHOSERVER: LIBTLS: %s: %d (%s)\n", A, errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
-#define LIBTLS_CONTEXT_ERROR(A, B)   fprintf(stderr, "ECHOSERVER: LIBTLS: %s %s: %d (%s)\n", A, tls_error(B), errno, strerror(errno));// WSACleanup(); exit(EXIT_FAILURE);
-// TODO: Should stop the program
+
+#if !defined _WIN32
+	#define WSACleanup()
+#endif
+
+#define ECHOSERVER_ERROR(A)          fprintf(stderr, "ECHOSERVER: %s: %d (%s)\n", A, errno, strerror(errno)); WSACleanup(); exit(EXIT_FAILURE);
+#define LIBTLS_NOCONTEXT_ERROR(A)    fprintf(stderr, "ECHOSERVER: LIBTLS: %s: %d (%s)\n", A, errno, strerror(errno)); WSACleanup(); exit(EXIT_FAILURE);
+#define LIBTLS_CONTEXT_ERROR(A, B)   fprintf(stderr, "ECHOSERVER: LIBTLS: %s %s: %d (%s)\n", A, tls_error(B), errno, strerror(errno)); WSACleanup(); exit(EXIT_FAILURE);
+#define LIBTLS_CONTEXT_WARN(A, B)   fprintf(stderr, "ECHOSERVER: LIBTLS: %s %s: %d (%s)\n", A, tls_error(B), errno, strerror(errno));
 
 // This macro was renamed shortly after the api change we want to account for
 #if defined TLS_READ_AGAIN
@@ -196,7 +201,8 @@ int main(int argc, char *argv[]) {
 		// The tls accept command takes the socket you send and makes a tls I/O context out of it
 		int int_status = tls_accept_socket(tls_sun_context, &tls_sun_io_context, sock_connection);
 		if (int_status != 0) {
-			LIBTLS_CONTEXT_ERROR("tls_accept_socket() failed", tls_sun_context);
+			LIBTLS_CONTEXT_WARN("tls_accept_socket() failed", tls_sun_context);
+			continue;
 		}
 
 		fprintf(stderr, "accepted a client\n");
@@ -204,19 +210,22 @@ int main(int argc, char *argv[]) {
 		// Read from the socket
 		ssize_t int_out_length;
 		if ((int_out_length = tls_read(tls_sun_io_context, str_buffer, MAX_BUFFER - 1)) < 0) {
-			LIBTLS_CONTEXT_ERROR("tls_read() failed", tls_sun_io_context);
+			LIBTLS_CONTEXT_WARN("tls_read() failed", tls_sun_io_context);
+			continue;
 		}
 
 		fprintf(stderr, "%lu bytes read from client: >%s<\n", (u_long)int_out_length, str_buffer);
 
 		// Write to the socket
 		if (tls_write(tls_sun_io_context, str_buffer, int_out_length) < 0) {
-			LIBTLS_CONTEXT_ERROR("tls_write() failed", tls_sun_io_context);
+			LIBTLS_CONTEXT_WARN("tls_write() failed", tls_sun_io_context);
+			continue;
 		}
 
 		// Close the tls I/O context
 		if (tls_close(tls_sun_io_context) != 0) {
-			LIBTLS_CONTEXT_ERROR("tls_close() failed", tls_sun_io_context);
+			LIBTLS_CONTEXT_WARN("tls_close() failed", tls_sun_io_context);
+			continue;
 		}
 
 		//// HARK YE ONLOOKER: DO NOT UNCOMMENT LINES FOLLOWING

@@ -39,6 +39,7 @@
 
 #if !defined _WIN32
 	#define WSACleanup()
+        #define closesocket close
 #endif
 
 #define ECHOSERVER_ERROR(A)          fprintf(stderr, "ECHOSERVER: %s: %d (%s)\n", A, errno, strerror(errno)); WSACleanup(); exit(EXIT_FAILURE);
@@ -111,7 +112,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Bind to the address
-	if (bind(sock_listening, res->ai_addr, res->ai_addrlen) == -1) {
+	if (bind(sock_listening, res->ai_addr, (int)res->ai_addrlen) == -1) {
 		ECHOSERVER_ERROR("bind() failed");
 	}
 
@@ -193,7 +194,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		// The tls accept command takes the socket you send and makes a tls I/O context out of it
-		int int_status = tls_accept_socket(tls_sun_context, &tls_sun_io_context, sock_connection);
+		int int_status = tls_accept_socket(tls_sun_context, &tls_sun_io_context, (int)sock_connection);
 		if (int_status != 0) {
 			LIBTLS_CONTEXT_WARN("tls_accept_socket() failed", tls_sun_context);
 			continue;
@@ -222,15 +223,13 @@ int main(int argc, char *argv[]) {
 			continue;
 		}
 
-		//// HARK YE ONLOOKER: DO NOT UNCOMMENT LINES FOLLOWING
-		// tls_close() HAS ALREADY CLOSED THE SOCKET, THESE LINES WILL ERROR!
-		// Close the connection socket
-		//if (close(sock_connection) != 0) {
-		//	ECHOSERVER_ERROR("close() failed");
-		//}
-
 		// Free the tls I/O context
 		tls_free(tls_sun_io_context);
+
+                // Close the connection socket
+                if (closesocket(sock_connection) != 0) {
+                        ECHOSERVER_ERROR("close() failed");
+                }
 	}
 }
 

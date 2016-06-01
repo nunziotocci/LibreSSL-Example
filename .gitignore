@@ -15,3 +15,4 @@ LibreSSLTesting/x86/Debug
 LibreSSLTesting/x86/Debug/*
 LibreSSLTesting/LibreSSL-Example
 LibreSSLTesting.VS.VS.opendb
+/LibreSSLTesting.VC.VC.opendb
